@@ -35,7 +35,7 @@ spec:
         - name: www-storage
           mountPath: /srv/app/
       - name: flask-nginx
-        image: nginx:
+        image: nginx:1.21.6
         imagePullPolicy: Always
         ports:
         - containerPort: 80
@@ -66,6 +66,9 @@ spec:
       - name: www-storage
         persistentVolumeClaim:
           claimName: flask-pv-claim
+      - name: uwsgi-config-volume
+        configMap:
+          name: uwsgi-config
       - name: nginx-config-volume
         configMap:
           name: nginx-config
