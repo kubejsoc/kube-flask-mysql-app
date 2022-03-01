@@ -24,6 +24,8 @@ spec:
       - name: flask-uwsgi
         image: debuggerboy/uwsgi:v1.0.2
         imagePullPolicy: Always
+        command: ["uwsgi"]
+        args: ["--ini", "/uwsgi.ini"]
         ports:
         - containerPort: 9000
           name: http
