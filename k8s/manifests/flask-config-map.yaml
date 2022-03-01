@@ -49,7 +49,7 @@ metadata:
 data:
   default.conf: |
     upstream flask-uwsgi {
-      server flask-nginx.default 8001;
+      server flask-uwsgi.default:8001;
     }
     server {
       listen 80 default_server;
