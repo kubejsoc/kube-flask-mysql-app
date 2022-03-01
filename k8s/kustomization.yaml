@@ -6,3 +6,4 @@ resources:
   - manifests/flask-pvc.yaml
   - manifests/flask-config-map.yaml
   - manifests/flask-deployment.yaml
+  - manifests/flask-service.yaml
