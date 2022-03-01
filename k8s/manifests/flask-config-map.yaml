@@ -19,7 +19,7 @@ data:
     #Socket path of WSGI
     socket = :8001
     #Listen on TCP socket
-    http = 0.0.0.0:8080
+    #http = 0.0.0.0:8080
     #Modified Permissions
     chmod-sock = 664
     #Graceful reloading

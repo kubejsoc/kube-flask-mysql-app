@@ -27,7 +27,7 @@ spec:
         command: ["uwsgi"]
         args: ["--ini", "/uwsgi.ini"]
         ports:
-        - containerPort: 9000
+        - containerPort: 8001
           name: http
           protocol: TCP
         volumeMounts:
