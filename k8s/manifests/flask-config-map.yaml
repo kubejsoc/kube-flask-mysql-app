@@ -7,7 +7,10 @@ data:
   uwsgi.ini: |
     [uwsgi]
     #WSGI module and Callable app
-    module = sample:app
+    chdir = /srv/app/public/
+    module = main
+    callable = app
+    plugins = python3
     #User ID for nginx config
     uid = www-data
     #Group ID for nginx config
@@ -48,9 +51,9 @@ metadata:
   name: nginx-config
 data:
   default.conf: |
-    upstream flask-uwsgi {
-      server flask-uwsgi.default:8001;
-    }
+    #upstream flask-uwsgi {
+    #  server flask-uwsgi.default:8001;
+    #}
     server {
       listen 80 default_server;
       listen [::]:80 default_server;
@@ -59,7 +62,7 @@ data:
       location / {
         include uwsgi_params;
         #uwsgi_pass unix:/tmp/uwsgi.socket;
-        uwsgi_pass flask-uwsgi;
+        uwsgi_pass 127.0.0.1:8001;
 
         proxy_redirect off;
         proxy_set_header Host $host;
@@ -67,6 +70,6 @@ data:
         proxy_set_header X-Forwarded-For
         $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Host $server_name;
-        proxy_set_header X-Forwarded-Proto https;
+        #proxy_set_header X-Forwarded-Proto https;
       }
     }
