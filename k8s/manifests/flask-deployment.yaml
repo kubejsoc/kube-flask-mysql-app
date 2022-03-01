@@ -1,0 +1,113 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: flaskapp
+    tier: frontend
+  name: web
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flaskapp
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: flaskapp
+        tier: frontend
+    spec:
+      containers:
+      - name: flask-uwsgi
+        image: debuggerboy/uwsgi:v1.0.2
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9000
+          name: http
+          protocol: TCP
+        volumeMounts:
+        - name: uwsgi-config-volume
+          mountPath: /uwsgi.ini
+          subPath: uwsgi.ini
+        - name: www-storage
+          mountPath: /srv/app/
+      - name: flask-nginx
+        image: nginx:
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        volumeMounts:
+        - name: nginx-config-volume
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: default.conf
+        - name: www-storage
+          mountPath: /srv/app/
+      initContainers:
+      - name: layering
+        image: debuggerboy/uwsgi:v1.0.2
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: start-config-volume
+          mountPath: /start.sh
+          subPath: start.sh
+        - name: www-storage
+          mountPath: /srv/app/
+        command:
+        - "bash"
+        - "/start.sh"
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: www-storage
+        persistentVolumeClaim:
+          claimName: flask-pv-claim
+      - name: nginx-config-volume
+        configMap:
+          name: nginx-config
+      - name: start-config-volume
+        configMap:
+          name: start-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-mysql
+  labels:
+    app: flaskapp
+spec:
+  selector:
+    matchLabels:
+      app: flaskapp
+      tier: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: flaskapp
+        tier: mysql
+    spec:
+      containers:
+      - image: mysql:5.6
+        name: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-pass
+              key: password
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim

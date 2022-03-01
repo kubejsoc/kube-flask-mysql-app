@@ -1,0 +1,8 @@
+secretGenerator:
+- name: mysql-pass
+  literals:
+  - password=m4g3@Ni5h
+resources:
+  - k8s/manifests/flask-pvc.yaml
+  - k8s/manifests/flask-config-map.yaml
+  - k8s/manifests/flask-deployment.yaml

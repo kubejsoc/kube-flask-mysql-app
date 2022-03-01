@@ -1,0 +1,67 @@
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: uwsgi-config
+data:
+  uwsgi.ini: |
+    [uwsgi]
+    #WSGI module and Callable app
+    module = sample:app
+    #User ID for nginx config
+    uid = www-data
+    #Group ID for nginx config
+    gid = www-data
+    #Serve as Master
+    master = true
+    #processes = Number of Process
+    processes = 3
+    #Socket path of WSGI
+    #socket = /tmp/uwsgi.socket
+    #Listen on TCP socket
+    http = 0.0.0.0:8080
+    #Modified Permissions
+    chmod-sock = 664
+    #Graceful reloading
+    lazy=true
+    #Auto cleanup the socket
+    vacuum = true
+    #For expected process signals at startup
+    die-on-term = true
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: start-config
+data:
+  start.sh: |
+    #!/bin/bash
+    cd /srv/app/
+    git clone https://github.com/kubejsoc/kube-flask-mysql-app.git /srv/app/public
+    cd /srv/app/public
+    rm -rf k8s
+    pip install -r requirements.txt
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: nginx-config
+data:
+  default.conf: |
+    server {
+      listen 80 default_server;
+      listen [::]:80 default_server;
+      server_name localhost;
+      root /srv/app/public;
+      location / {
+        include uwsgi_params;
+        uwsgi_pass unix:/tmp/uwsgi.socket;
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For
+        $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host $server_name;
+        proxy_set_header X-Forwarded-Proto https;
+      }
+    }
