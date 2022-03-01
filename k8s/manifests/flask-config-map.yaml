@@ -7,6 +7,7 @@ data:
   uwsgi.ini: |
     [uwsgi]
     #WSGI module and Callable app
+    virtualenv = /srv/app/public/venv/
     chdir = /srv/app/public/
     module = main
     callable = app
@@ -43,6 +44,8 @@ data:
     git clone https://github.com/kubejsoc/kube-flask-mysql-app.git /srv/app/public
     cd /srv/app/public
     rm -rf k8s
+    /usr/bin/python3 -m venv venv
+    source venv/bin/activate
     pip install -r requirements.txt
 ---
 kind: ConfigMap
